@@ -2,6 +2,7 @@ import os
 from six.moves.urllib.request import urlretrieve
 import gzip, binascii, struct, numpy
 import matplotlib.pyplot as plt
+import globals_static as gs
 
 %matplotlib inline
 
@@ -17,14 +18,6 @@ class PrepareMnistData:
     TestDataFileNameGz = 't10k-images-idx3-ubyte.gz' 
     TestLabelsFileNameGz = 't10k-labels-idx1-ubyte.gz'
 
-    #get train and test imgae data
-    IMAGE_SIZE = 28
-    PIXEL_DEPTH = 255
-    TRAIN_IMAGE_NUM = 60000
-    TEST_IMAGE_NUM = 10000
-    NUM_LABELS = 10
-    VALIDATION_SIZE = 5000
-        
     __train_data_filename = ''
     __train_labels_filename = ''
     __test_data_filename = ''
@@ -73,16 +66,16 @@ class PrepareMnistData:
             # Skip the magic number and dimensions; we know these values.
             bytestream.read(16)
 
-            buf = bytestream.read(cls.IMAGE_SIZE * cls.IMAGE_SIZE * num_images)
+            buf = bytestream.read(gs.IMAGE_SIZE * gs.IMAGE_SIZE * num_images)
             data = numpy.frombuffer(buf, dtype=numpy.uint8).astype(numpy.float32)
-            data = (data - (cls.PIXEL_DEPTH / 2.0)) / cls.PIXEL_DEPTH
-            data = data.reshape(num_images, cls.IMAGE_SIZE, cls.IMAGE_SIZE, 1)
+            data = (data - (gs.PIXEL_DEPTH / 2.0)) / gs.PIXEL_DEPTH
+            data = data.reshape(num_images, gs.IMAGE_SIZE, gs.IMAGE_SIZE, 1)
             return data
 
     @classmethod
     def do_train_test_data(cls):
-        cls.__train_data = cls.__extract_data(cls.__train_data_filename, cls.TRAIN_IMAGE_NUM)
-        cls.__test_data = cls.__extract_data(cls.__test_data_filename, cls.TEST_IMAGE_NUM)
+        cls.__train_data = cls.__extract_data(cls.__train_data_filename, gs.TRAIN_IMAGE_NUM)
+        cls.__test_data = cls.__extract_data(cls.__test_data_filename, gs.TEST_IMAGE_NUM)
 
     # print image in the data file
     @classmethod
@@ -98,7 +91,7 @@ class PrepareMnistData:
         for i in range (row):
             for j in range (colum):
                 p = fig.add_subplot(row, colum, i*colum+j+1)
-                p.imshow(datas[start_pos + i*colum+j].reshape(cls.IMAGE_SIZE, cls.IMAGE_SIZE), cmap=plt.cm.Greys);
+                p.imshow(datas[start_pos + i*colum+j].reshape(gs.IMAGE_SIZE, gs.IMAGE_SIZE), cmap=plt.cm.Greys);
 
     #labels data
     @classmethod
@@ -111,22 +104,22 @@ class PrepareMnistData:
             buf = bytestream.read(1 * num_images)
             labels = numpy.frombuffer(buf, dtype=numpy.uint8)
             # Convert to dense 1-hot representation.
-            labels = (numpy.arange(cls.NUM_LABELS) == labels[:, None]).astype(numpy.float32)
+            labels = (numpy.arange(gs.NUM_LABELS) == labels[:, None]).astype(numpy.float32)
             print('Training labels shape', labels.shape)
             return labels
 
     @classmethod
     def do_train_test_label(cls):
-        cls.__train_labels = cls.__extract_labels(cls.__train_labels_filename, cls.TRAIN_IMAGE_NUM)
-        cls.__test_labels = cls.__extract_labels(cls.__test_labels_filename, cls.TEST_IMAGE_NUM)
+        cls.__train_labels = cls.__extract_labels(cls.__train_labels_filename, gs.TRAIN_IMAGE_NUM)
+        cls.__test_labels = cls.__extract_labels(cls.__test_labels_filename, gs.TEST_IMAGE_NUM)
 
     #validation data
     @classmethod
     def do_validation_data_label(cls):
-        cls.__validation_data = cls.__train_data[:cls.VALIDATION_SIZE, :, :, :]
-        cls.__validation_labels = cls.__train_labels[:cls.VALIDATION_SIZE]
-        cls.__train_data = cls.__train_data[cls.VALIDATION_SIZE:, :, :, :]
-        cls.__train_labels = cls.__train_labels[cls.VALIDATION_SIZE:]
+        cls.__validation_data = cls.__train_data[:gs.VALIDATION_SIZE, :, :, :]
+        cls.__validation_labels = cls.__train_labels[:gs.VALIDATION_SIZE]
+        cls.__train_data = cls.__train_data[gs.VALIDATION_SIZE:, :, :, :]
+        cls.__train_labels = cls.__train_labels[gs.VALIDATION_SIZE:]
         
         train_size = cls.__train_labels.shape[0]
         print('Validation shape', cls.__validation_data.shape)
