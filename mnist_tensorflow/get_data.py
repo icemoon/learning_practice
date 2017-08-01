@@ -4,7 +4,7 @@ import gzip, binascii, struct, numpy
 import matplotlib.pyplot as plt
 import globals_static as gs
 
-%matplotlib inline
+#%matplotlib inline
 
 SOURCE_URL = 'http://yann.lecun.com/exdb/mnist/'
 WORK_DIRECTORY = "/tmp/mnist-data"

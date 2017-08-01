@@ -1,6 +1,6 @@
 import tensorflow as tf
 import globals_static as gs
-import get_data.PrepareMnistData as gp
+from get_data import *
 
 class MnistFlow:
     def __init__(self, layerNum, inputChannel, outputChannels, filterSize):
@@ -17,13 +17,12 @@ class MnistFlow:
         self.fc_biases = []
     
     def __buildConvLayer(self, layer, inChan):
-        self.weights.append(tf.Variable(tr.truncated_normal([self.filterSize, self.filterSize, inChan, self.outChan[layer]],
-                                            stddev = 0.1, seed = SEED)))
+        self.weights.append(tf.Variable(tf.truncated_normal([self.filterSize, self.filterSize, inChan, self.outChan[layer]],
+                                            stddev = 0.1, seed = gs.SEED)))
         self.biases.append(tf.Variable(tf.zeros[self.outChan[layer]]))
 
     def __buildFcLayer(self, layer, uSize, depth):
-        self.fc_weights.append(tf.Variable(tf.truncated_normal([uSize, depth],
-                                            stddev = 0.1, seed = SEED)))
+        self.fc_weights.append(tf.Variable(tf.truncated_normal([uSize, depth], stddev = 0.1, seed = gs.SEED)))
         self.fc_biases.append(tf.Variable(tf.constant(0.1, shape[depth])))
 
     def buildModel(self, validate_data, test_data):
@@ -35,7 +34,7 @@ class MnistFlow:
         for i in range(self.layerCnt):
             self.__buildConvLayer(i, inChan)
             inChan = self.outChan[i]
-        self.__buildFcLayer(0, gs.IMAGE_SIZE//4*gs.IMAGE_SIZE//4*64, 512)
+        self.__buildFcLayer(0, gs.IMAGE_SIZE // 4 * gs.IMAGE_SIZE // 4 * 64, 512)
         self.__buildFcLayer(1, 512, gs.NUM_LABELS)
         print("build model done")
     
@@ -52,9 +51,15 @@ class MnistFlow:
         hidden = tf.nn.relu(tf.matmul(reshape, self.fc_weights[0]) + self.fc_biases[0])
             
         if isTrain:
-            hidden = tf.nn.dropout(hidden, 0.5, seed=SEED)
+            hidden = tf.nn.dropout(hidden, 0.5, seed=gs.SEED)
         return tf.matmul(hidden, self.fc_weights[1]) + self.fc_biases[1]
         print("train model done")
 
-
-
+if __name__ == '__main__':
+    PrepareMnistData.run()
+    train_data, _ = PrepareMnistData.get_train_data_labels()
+    test_data, _ = PrepareMnistData.get_test_data_labels()
+    validate_data, _ = PrepareMnistData.get_validation_data_labels()
+    mf = MnistFlow(2, 1, [32,64], 5)
+    mf.buildModel(validate_data, test_data)
+    mf.model(train_data, True)
